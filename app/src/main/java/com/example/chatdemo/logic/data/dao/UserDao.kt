@@ -17,11 +17,13 @@ interface UserDao {
     fun updateUser(newUser: UserInfo)
 
     @Query("select * from Userinfo " +
-            "where user_id = :userId")
+            "where userId = :userId"
+    )
     fun checkUserInfo(userId: Long) : List<UserInfo>
 
-    @Query("select user_id from UserInfo " +
-            "where user_id in (select id_friend from Friend " +
+    @Query(
+        "select userId from UserInfo " +
+                "where userId in (select id_friend from Friend " +
             "where id_my = :userId)")
     fun loadAllFriend(userId: Long) : List<Long>
 

@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import com.example.chatdemo.data.dao.GroupDao
+import com.example.chatdemo.logic.data.dao.GroupDao
 import com.example.nettyserver.data.dao.UserDao
 import com.example.nettyserver.data.entity.Friend
 import com.example.nettyserver.data.entity.Group

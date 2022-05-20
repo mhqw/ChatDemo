@@ -1,4 +1,4 @@
-package com.example.chatdemo.data.dao
+package com.example.chatdemo.logic.data.dao
 
 import androidx.room.*
 import com.example.nettyserver.data.entity.GroupInfo

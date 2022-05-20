@@ -9,5 +9,5 @@ import kotlinx.android.parcel.Parcelize
 @Entity
 data class UserInfo(val email: String,val password: String,val name: String) : Parcelable{
     @PrimaryKey(autoGenerate = true)
-    var user_id: Long = 0
+    var userId: Long = 0
 }

@@ -1,31 +1,60 @@
 package com.example.chatdemo
 
+import android.content.Context
 import android.content.Intent
 import android.graphics.Color
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.Toast
-import com.example.nettyserver.data.database.AppDatabase
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
+import com.example.chatdemo.utils.ActivityCollector
+import com.example.chatdemo.utils.BaseActivity
+import com.example.chatdemo.viewmodel.UserViewModel
 import com.example.nettyserver.data.entity.UserInfo
 import com.example.nettyserver.utils.MD5
 import com.example.nettyserver.utils.RegisterState
-import kotlinx.android.synthetic.main.activity_login.*
 import kotlinx.android.synthetic.main.activity_login.password
 import kotlinx.android.synthetic.main.activity_login.register
 import kotlinx.android.synthetic.main.activity_register.*
-import kotlin.concurrent.thread
 
-class RegisterActivity : AppCompatActivity() {
+class RegisterActivity : BaseActivity() {
 
     companion object{
         val TAG = "RegisterActivity"
+
+        fun actionStart(context: Context){
+            val intent = Intent(context,RegisterActivity::class.java)
+            context.startActivity(intent)
+        }
+    }
+
+    private val userViewModel by lazy {
+        ViewModelProvider(this).get(UserViewModel::class.java)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_register)
+
+        initActivity()
+
+        initListener()
+
+        initViewModelObserver()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        ActivityCollector.removeActivity(this)
+    }
+
+    private fun initActivity(){
+        //将当前activity 加入activity 管理器
+        ActivityCollector.addActivity(this)
+        //初始化userViewModel 工作
+        userViewModel.context = this
 
         //隐藏状态栏
         val decorView = window.decorView
@@ -33,8 +62,6 @@ class RegisterActivity : AppCompatActivity() {
             View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
                     View.SYSTEM_UI_FLAG_LAYOUT_STABLE
         window.statusBarColor = Color.TRANSPARENT
-
-        initListener()
     }
 
     private fun initListener() {
@@ -53,23 +80,25 @@ class RegisterActivity : AppCompatActivity() {
                 Toast.makeText(this, "二次密码不同", Toast.LENGTH_SHORT).show()
             }else{
                 //插入数据
-                val userDao = AppDatabase.getDatabase(this).userDao()
                 val newUserInfo = UserInfo(newEmail,MD5.encode(newPassword),newName)
-                thread {
-                    newUserInfo.user_id = userDao.insertUser(newUserInfo)
-                }
-
-                //FIXME:利用 LiveData 来改造进行回调
-                while(newUserInfo.user_id == 0L){
-                    Thread.sleep(100)
-                }
-                flag = RegisterState.REGISTER_CREAT_SUCCESS
-                Log.e(TAG,"RegisterState.REGISTER_CREAT_SUCCESS")
-                Log.e(TAG,"newUserId = ${newUserInfo.user_id}")
-                val intent = Intent(this,LoginActivity::class.java)
-                intent.putExtra("new_user_id",newUserInfo.user_id)
-                startActivity(intent)
+                userViewModel.insertUser(newUserInfo)
             }
         }
+    }
+
+    private fun initViewModelObserver(){
+        userViewModel.newUserIdLiveData.observe(this, Observer { result->
+            val newUserId = result.getOrNull()
+            if(newUserId != null){
+                userViewModel.newUserId = newUserId
+                val intent = Intent(this,LoginActivity::class.java)
+                intent.putExtra("new_user_id",newUserId)
+                startActivity(intent)
+            }else{
+                userViewModel.newUserId = -1
+                Toast.makeText(this, "注册失败，请稍后再试", Toast.LENGTH_SHORT).show()
+                result.exceptionOrNull()?.printStackTrace()
+            }
+        })
     }
 }
