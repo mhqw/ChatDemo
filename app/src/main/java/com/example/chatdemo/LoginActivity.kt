@@ -25,6 +25,13 @@ class LoginActivity : BaseActivity() {
             val intent = Intent(context,LoginActivity::class.java)
             context.startActivity(intent)
         }
+
+        fun actionStart(context: Context,newUserId: Long){
+            val intent = Intent(context,LoginActivity::class.java).apply {
+                putExtra("new_user_id",newUserId)
+            }
+            context.startActivity(intent)
+        }
     }
 
     private val userViewModel by lazy {
@@ -33,7 +40,6 @@ class LoginActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_login)
 
         initActivity()
 
@@ -50,17 +56,25 @@ class LoginActivity : BaseActivity() {
     }
 
     private fun initActivity(){
+        setContentView(R.layout.activity_login)
         //将当前activity 加入activity 管理器
         ActivityCollector.addActivity(this)
         //初始化userViewModel 工作
         userViewModel.context = this
+
+        //如果本地有登录数据，直接进入主界面
+        if(userViewModel.isUserSave()){
+            val user = userViewModel.getUserData()
+            MainActivity.actionStart(this,user)
+            this.finish()
+        }
 
         //隐藏状态栏
         val decorView = window.decorView
         decorView.systemUiVisibility =
             View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
                     View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-        window.statusBarColor = Color.TRANSPARENT
+        window.statusBarColor = Color.BLACK
     }
 
     private fun initView(){
@@ -79,8 +93,7 @@ class LoginActivity : BaseActivity() {
         }
 
         register.setOnClickListener {
-            val intent = Intent(this,RegisterActivity::class.java)
-            startActivity(intent)
+            RegisterActivity.actionStart(this)
         }
     }
 
@@ -98,9 +111,8 @@ class LoginActivity : BaseActivity() {
                         return@Observer
                     }
                     Toast.makeText(this, "登录成功", Toast.LENGTH_SHORT).show()
-                    val intent = Intent(this,MainActivity::class.java)
-                    intent.putExtra("user_data",user)
-                    startActivity(intent)
+                    MainActivity.actionStart(this,user)
+                    userViewModel.saveUser(user)
                     return@Observer
                 }
                 //userList.size = 0

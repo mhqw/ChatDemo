@@ -36,7 +36,6 @@ class RegisterActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_register)
 
         initActivity()
 
@@ -51,6 +50,7 @@ class RegisterActivity : BaseActivity() {
     }
 
     private fun initActivity(){
+        setContentView(R.layout.activity_register)
         //将当前activity 加入activity 管理器
         ActivityCollector.addActivity(this)
         //初始化userViewModel 工作
@@ -61,7 +61,7 @@ class RegisterActivity : BaseActivity() {
         decorView.systemUiVisibility =
             View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
                     View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-        window.statusBarColor = Color.TRANSPARENT
+        window.statusBarColor = Color.BLACK
     }
 
     private fun initListener() {
@@ -91,9 +91,7 @@ class RegisterActivity : BaseActivity() {
             val newUserId = result.getOrNull()
             if(newUserId != null){
                 userViewModel.newUserId = newUserId
-                val intent = Intent(this,LoginActivity::class.java)
-                intent.putExtra("new_user_id",newUserId)
-                startActivity(intent)
+                LoginActivity.actionStart(this,newUserId)
             }else{
                 userViewModel.newUserId = -1
                 Toast.makeText(this, "注册失败，请稍后再试", Toast.LENGTH_SHORT).show()

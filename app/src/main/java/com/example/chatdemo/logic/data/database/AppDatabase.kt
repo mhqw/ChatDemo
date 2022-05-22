@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import com.example.chatdemo.logic.data.dao.FriendDao
 import com.example.chatdemo.logic.data.dao.GroupDao
 import com.example.nettyserver.data.dao.UserDao
 import com.example.nettyserver.data.entity.Friend
@@ -19,6 +20,8 @@ abstract class AppDatabase : RoomDatabase(){
     abstract fun userDao(): UserDao
 
     abstract fun groupDao(): GroupDao
+
+    abstract fun friendDao(): FriendDao
 
     companion object{
         private var instance: AppDatabase? = null

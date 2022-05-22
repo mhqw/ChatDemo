@@ -34,4 +34,16 @@ class UserViewModel : ViewModel() {
         checkUserInfoLiveData.value = userId
     }
 
+    fun isUserSave() = Repository.isUserSave()
+
+    fun saveUser(user: UserInfo){
+        Repository.saveUser(user)
+    }
+
+    fun clearUserData(){
+        Repository.clearUserData()
+    }
+
+    fun getUserData() = Repository.getUserData()
+
 }
